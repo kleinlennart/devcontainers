@@ -1,0 +1,102 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/rocker-org/devcontainer-templates/tree/main/src/r-ver
+
+// All Rocker features: https://github.com/rocker-org/devcontainer-features/tree/main/src
+
+{
+	"name": "Climate Acceptance Paper Devcontainer",
+	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+	"image": "ghcr.io/rocker-org/devcontainer/tidyverse:4.3.2",
+	// should be the same version as renv
+	// ideally start with clean R container (takes longer to run renv though)
+
+	// Features ----------------------------------------------------------------------------
+	// https://containers.dev/features
+	"features": {
+		"ghcr.io/rocker-org/devcontainer-features/apt-packages:1": {
+			"packages": "jq"
+			// jq needed for rstudio-server
+			// FIXME: add libxt6 here?
+		},
+
+		// https://github.com/rocker-org/devcontainer-features/tree/main/src/rstudio-server
+		"ghcr.io/rocker-org/devcontainer-features/rstudio-server": { },
+
+		// https://github.com/rocker-org/devcontainer-features/tree/main/src/quarto-cli
+		"ghcr.io/rocker-org/devcontainer-features/quarto-cli:1": {
+			// "version": "latest"
+			"installChromium": true,
+			"installTinyTex": false
+		},
+
+		// Chromium dependencies
+		"ghcr.io/rocker-org/devcontainer-features/apt-packages:1": {
+			"packages": "libgtk-3-dev,libnotify-dev,libgconf-2-4,libnss3,libxss1,libasound2"
+		},
+
+		// fix X11
+		"ghcr.io/rocker-org/devcontainer-features/apt-packages:1": {
+			"packages": "libxt6"
+		},
+
+		// README: https://github.com/rocker-org/devcontainer-features/tree/main/src/r-packages
+		"ghcr.io/rocker-org/devcontainer-features/r-packages:1": {
+			"packages": "renv"
+			//	"packages": "benchmarkme,here,lavaan,Microsoft365R,Hmisc,qreport,kableExtra,plotly",
+			//	"installSystemRequirements": true
+		}
+		// not needed here, use renv file instead!
+	},
+
+	// Ports & Server ----------------------------------------------------------------------------
+
+	// https://support.posit.co/hc/en-us/articles/234653607-Getting-Started-with-Posit-Workbench-RStudio-Server#:~:text=Managing%20RStudio%20Server%20Open%2DSource
+	// /usr/local/share/rocker-devcontainer-features/rstudio-server/data
+
+	// start RStudio Server process in container
+	// "postAttachCommand": {
+	// 	"rstudio-start": "rserver"
+	// },
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	"forwardPorts": [ 8787 ],
+	// README: https://containers.dev/implementors/json_reference/#port-attributes
+	"portsAttributes": {
+		"8787": {
+			"label": "RStudio IDE",
+			"requireLocalPort": true, // defaults to false
+			"onAutoForward": "ignore" // defaults to notify
+		}
+	},
+
+	// Lifecycle Scripts ----------------------------------------------------------------------------
+	// https://containers.dev/implementors/json_reference/#lifecycle-scripts
+
+	// "onCreateCommand": "",
+
+	// Use 'postCreateCommand' to run commands after the container is created.
+	// "postCreateCommand": "R -q -e 'renv::install()'",
+	"postCreateCommand": "sh ./.devcontainer/postCreateCommand.sh",
+
+	// run every time the container starts
+	"postStartCommand": "sh ./.devcontainer/postStartCommand.sh",
+	// TODO: add full health maintenance script run here!
+
+	// Configure tool-specific properties.
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"quarto.quarto",
+				"REditorSupport.r",
+				// user custom:
+				"GitHub.copilot-chat",
+				"GitHub.copilot",
+				"eamodio.gitlens"
+			]
+		}
+	}
+
+	// Uncomment to connect as root instead.
+	// More info: https://aka.ms/dev-containers-non-root.
+	// https://containers.dev/implementors/json_reference/#remoteUser
+	// "remoteUser": "root"
+}
